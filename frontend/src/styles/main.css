@@ -1,0 +1,187 @@
+/* Mobile-first responsive styles */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: #f5f5f5;
+    padding: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    padding: 1rem 0 2rem;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    color: #1a1a2e;
+}
+
+.section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section h2 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    color: #1a1a2e;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 0.25rem;
+    transition: opacity 0.2s;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: #4361ee;
+    color: #fff;
+}
+
+.btn-danger {
+    background: #e63946;
+    color: #fff;
+}
+
+.btn-success {
+    background: #2a9d8f;
+    color: #fff;
+}
+
+/* Recorder */
+#recorder-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#recording-status {
+    margin: 0.5rem 0;
+    font-style: italic;
+    color: #555;
+}
+
+audio {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+/* Results */
+.results-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 600px) {
+    .results-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.score-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.score-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #1a1a2e;
+}
+
+.score-card .score {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #4361ee;
+    margin-bottom: 0.5rem;
+}
+
+.score-card p {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.overall-score {
+    text-align: center;
+    padding: 1.5rem;
+    background: #1a1a2e;
+    color: #fff;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.overall-score h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.recommendations {
+    padding: 1rem;
+}
+
+.recommendations h3 {
+    margin-bottom: 0.75rem;
+}
+
+.recommendations ul {
+    padding-left: 1.5rem;
+}
+
+.recommendations li {
+    margin-bottom: 0.5rem;
+}
+
+/* History table */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.history-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Error */
+.error {
+    color: #e63946;
+    font-weight: 500;
+}

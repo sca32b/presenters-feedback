@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presenter Feedback</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-glow"></div>
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="login-logo-ring">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="login-title">Presenter<br>Feedback</h1>
+                <p class="login-subtitle">Elevate your delivery to TED-level.</p>
+                <form id="loginForm" class="login-form" autocomplete="off">
+                    <div class="login-field">
+                        <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email" />
+                    </div>
+                    <div class="login-field">
+                        <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password" />
+                    </div>
+                    <div id="loginError" class="login-error hidden"></div>
+                    <button type="submit" id="loginBtn" class="login-btn">
+                        <span id="loginBtnText">Enter</span>
+                        <div id="loginSpinner" class="login-spinner hidden"></div>
+                    </button>
+                </form>
+                <div class="login-footer">
+                    <span class="login-dot"></span>
+                    <span class="login-footer-text">Powered by Claude Sonnet 4.5</span>
+                    <span class="login-dot"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-inner">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                    <h1>Presenter Feedback</h1>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="historyBtn" class="btn btn-ghost" aria-label="View history">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span class="btn-label">History</span>
+                    </button>
+                    <button id="logoutBtn" class="btn btn-ghost btn-sm" aria-label="Sign out">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Recording Section -->
+            <section class="card recording-section" id="recordingSection">
+                <h2 class="section-title">Record Your Presentation</h2>
+                <p class="section-desc">Record a speech sample or upload an audio file to get AI-powered feedback on your presentation skills.</p>
+
+                <!-- Audio Level Visualizer -->
+                <div class="visualizer-container" id="visualizerContainer">
+                    <div class="visualizer" id="visualizer">
+                        <!-- Bars are generated by JS -->
+                    </div>
+                    <div class="timer" id="timer">00:00</div>
+                </div>
+
+                <!-- Recording Controls -->
+                <div class="controls" id="controls">
+                    <button id="recordBtn" class="btn btn-record" aria-label="Start recording">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                            <circle cx="12" cy="12" r="8"/>
+                        </svg>
+                        <span>Record</span>
+                    </button>
+                    <button id="pauseBtn" class="btn btn-control hidden" aria-label="Pause recording">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <rect x="6" y="4" width="4" height="16"/>
+                            <rect x="14" y="4" width="4" height="16"/>
+                        </svg>
+                        <span>Pause</span>
+                    </button>
+                    <button id="stopBtn" class="btn btn-stop hidden" aria-label="Stop recording">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <rect x="6" y="6" width="12" height="12" rx="1"/>
+                        </svg>
+                        <span>Stop</span>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span>or upload an audio file</span>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" accept=".wav,.mp3,.m4a,.webm,.ogg" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <p>Drag & drop your audio file here</p>
+                    <p class="upload-hint">Supports WAV, MP3, M4A, WebM (max 25 MB)</p>
+                </div>
+
+                <!-- Selected file info -->
+                <div class="file-info hidden" id="fileInfo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M9 18V5l12-2v13"/>
+                        <circle cx="6" cy="18" r="3"/>
+                        <circle cx="18" cy="16" r="3"/>
+                    </svg>
+                    <div class="file-details">
+                        <span class="file-name" id="fileName"></span>
+                        <span class="file-size" id="fileSize"></span>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" id="clearFileBtn" aria-label="Remove file">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Submit / Discard Buttons -->
+                <div class="action-buttons" id="actionButtons">
+                    <button id="analyzeBtn" class="btn btn-primary btn-lg hidden" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <path d="M22 2L11 13"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                        </svg>
+                        <span>Analyze Presentation</span>
+                    </button>
+                    <button id="discardBtn" class="btn btn-discard hidden">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        <span>Discard Recording</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section class="card loading-section hidden" id="loadingSection">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <h3 id="loadingTitle">Analyzing your presentation...</h3>
+                    <p class="loading-step" id="loadingStep">Uploading audio...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feedback Section -->
+            <section class="card feedback-section hidden" id="feedbackSection">
+                <div class="feedback-header">
+                    <h2 class="section-title">Your Feedback</h2>
+                    <button class="btn btn-ghost btn-sm" id="newRecordingBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <polyline points="1 4 1 10 7 10"/>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                        </svg>
+                        <span>New Recording</span>
+                    </button>
+                </div>
+
+                <!-- Overall Score -->
+                <div class="overall-score" id="overallScore">
+                    <div class="score-ring">
+                        <svg viewBox="0 0 120 120">
+                            <circle class="score-ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="8"/>
+                            <circle class="score-ring-fill" id="scoreRingFill" cx="60" cy="60" r="52" fill="none" stroke-width="8"
+                                stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+                        </svg>
+                        <div class="score-value">
+                            <span class="score-number" id="scoreNumber">0</span>
+                            <span class="score-max">/100</span>
+                        </div>
+                    </div>
+                    <div class="score-label">Overall Score</div>
+                    <p class="score-summary" id="scoreSummary"></p>
+                </div>
+
+                <!-- Category Cards -->
+                <div class="category-grid">
+                    <div class="category-card" id="voiceCard">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            </svg>
+                        </div>
+                        <h3>Voice & Tone</h3>
+                        <div class="category-score">
+                            <div class="score-bar"><div class="score-bar-fill" id="voiceScoreBar"></div></div>
+                            <span class="score-text" id="voiceScoreText">--</span>
+                        </div>
+                        <p class="category-summary" id="voiceSummary"></p>
+                        <button class="expand-btn" aria-label="Show details">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class="category-detail hidden" id="voiceDetail"></div>
+                    </div>
+
+                    <div class="category-card" id="vocabCard">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                        </div>
+                        <h3>Vocabulary</h3>
+                        <div class="category-score">
+                            <div class="score-bar"><div class="score-bar-fill" id="vocabScoreBar"></div></div>
+                            <span class="score-text" id="vocabScoreText">--</span>
+                        </div>
+                        <p class="category-summary" id="vocabSummary"></p>
+                        <button class="expand-btn" aria-label="Show details">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class="category-detail hidden" id="vocabDetail"></div>
+                    </div>
+
+                    <div class="category-card" id="speedCard">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <h3>Delivery Speed</h3>
+                        <div class="category-score">
+                            <div class="score-bar"><div class="score-bar-fill" id="speedScoreBar"></div></div>
+                            <span class="score-text" id="speedScoreText">--</span>
+                        </div>
+                        <p class="category-summary" id="speedSummary"></p>
+                        <button class="expand-btn" aria-label="Show details">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class="category-detail hidden" id="speedDetail"></div>
+                    </div>
+
+                    <div class="category-card" id="readinessCard">
+                        <div class="category-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </div>
+                        <h3>Stage Readiness</h3>
+                        <div class="category-score">
+                            <div class="score-bar"><div class="score-bar-fill" id="readinessScoreBar"></div></div>
+                            <span class="score-text" id="readinessScoreText">--</span>
+                        </div>
+                        <p class="category-summary" id="readinessSummary"></p>
+                        <button class="expand-btn" aria-label="Show details">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class="category-detail hidden" id="readinessDetail"></div>
+                    </div>
+                </div>
+
+                <!-- Executive Presence Tips -->
+                <div class="executive-presence-section hidden" id="executivePresenceSection">
+                    <div class="executive-presence-header">
+                        <span class="executive-presence-icon">&#128188;</span>
+                        <h3>Executive Presence Tips</h3>
+                    </div>
+                    <ul class="executive-presence-list" id="executivePresenceList"></ul>
+                </div>
+
+                <!-- Suggestions -->
+                <div class="suggestions-section" id="suggestionsSection">
+                    <h3>Key Suggestions</h3>
+                    <ul class="suggestions-list" id="suggestionsList"></ul>
+                </div>
+            </section>
+
+            <!-- Recording History Section (inline, below main content) -->
+            <section class="card recording-history-section hidden" id="recordingHistorySection">
+                <div class="recording-history-header">
+                    <h2 class="section-title">Recording History</h2>
+                </div>
+                <div id="recordingHistoryList" class="recording-history-list">
+                    <div class="recording-history-empty" id="recordingHistoryEmpty">
+                        <p>No past analyses found. Record or upload audio to get started.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- History Panel -->
+        <div class="history-overlay hidden" id="historyOverlay"></div>
+        <aside class="history-panel hidden" id="historyPanel">
+            <div class="history-header">
+                <h2>Analysis History</h2>
+                <button class="btn btn-ghost btn-sm" id="closeHistoryBtn" aria-label="Close history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="history-empty" id="historyEmpty">
+                    <p>No analyses yet. Record or upload audio to get started.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Mic Permission Modal -->
+        <div class="modal-overlay hidden" id="micModal">
+            <div class="modal">
+                <div class="modal-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                </div>
+                <h3>Microphone Access Required</h3>
+                <p>To record your presentation, please allow microphone access in your browser settings.</p>
+                <ol class="mic-instructions">
+                    <li>Click the lock/info icon in your browser's address bar</li>
+                    <li>Find "Microphone" in the permissions list</li>
+                    <li>Change the setting to "Allow"</li>
+                    <li>Refresh the page and try again</li>
+                </ol>
+                <button class="btn btn-primary" id="closeMicModal">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

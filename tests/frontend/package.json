@@ -1,0 +1,15 @@
+{
+  "name": "presenter-feedback-frontend-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend tests for the Presenter Feedback application",
+  "scripts": {
+    "test": "jest --config jest.config.js",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "test:watch": "jest --config jest.config.js --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}

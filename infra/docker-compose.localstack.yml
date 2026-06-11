@@ -1,0 +1,26 @@
+# LocalStack for local AWS service emulation
+# Usage: docker-compose -f infra/docker-compose.localstack.yml up -d
+#
+# Provides local emulation of S3, DynamoDB, and basic Lambda.
+# Note: Transcribe and Bedrock are NOT available in LocalStack Community.
+# The backend uses mock implementations for those in LOCAL_DEV mode.
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: presenters-feedback-localstack
+    ports:
+      - "4566:4566"        # LocalStack gateway
+      - "4510-4559:4510-4559"  # External service ports
+    environment:
+      - SERVICES=s3,dynamodb,iam
+      - DEBUG=0
+      - PERSISTENCE=1
+      - DEFAULT_REGION=us-east-1
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./init-localstack.sh:/etc/localstack/init/ready.d/init-localstack.sh
+
+volumes:
+  localstack-data:

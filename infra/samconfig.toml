@@ -1,0 +1,27 @@
+# SAM CLI deployment configuration
+# Usage:
+#   sam deploy                        # deploys dev environment
+#   sam deploy --config-env prod      # deploys prod environment
+
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "presenters-feedback-dev"
+resolve_s3 = true
+s3_prefix = "presenters-feedback"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=dev AudioRetentionDays=7 BedrockModelId=anthropic.claude-sonnet-4-5-20250929-v1:0"
+
+[default.build.parameters]
+use_container = false
+
+[prod.deploy.parameters]
+stack_name = "presenters-feedback-prod"
+resolve_s3 = true
+s3_prefix = "presenters-feedback-prod"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=prod AudioRetentionDays=30 BedrockModelId=anthropic.claude-sonnet-4-5-20250929-v1:0"

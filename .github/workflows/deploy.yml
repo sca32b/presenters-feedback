@@ -1,0 +1,163 @@
+# GitHub Actions: Test and Deploy
+#
+# Triggers:
+#   - Push to main: deploy to prod
+#   - Push to develop: deploy to dev
+#   - Pull request to main: run tests only
+
+name: Test & Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write   # For OIDC auth with AWS
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # ==========================================================================
+  # Test
+  # ==========================================================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements-dev.txt
+          pip install -r tests/requirements-test.txt
+
+      - name: Run linting
+        run: |
+          cd backend
+          ruff check app/
+          ruff format --check app/
+
+      - name: Run unit tests
+        env:
+          LOCAL_DEV: "true"
+          PYTHONPATH: backend
+        run: |
+          python -m pytest tests/unit/ -v --tb=short
+
+      - name: Run integration tests
+        env:
+          LOCAL_DEV: "true"
+          PYTHONPATH: backend
+        run: |
+          python -m pytest tests/integration/ -v --tb=short
+
+  # ==========================================================================
+  # Deploy Dev
+  # ==========================================================================
+  deploy-dev:
+    name: Deploy to Dev
+    needs: test
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build SAM application
+        run: |
+          cd infra
+          sam build --use-container
+
+      - name: Deploy to dev
+        run: |
+          cd infra
+          sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+
+      - name: Deploy frontend
+        run: |
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name presenters-feedback-dev \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" \
+            --output text)
+          aws s3 sync frontend/public/ "s3://$BUCKET/" --delete
+
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name presenters-feedback-dev \
+            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+            --output text)
+          aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
+
+  # ==========================================================================
+  # Deploy Prod
+  # ==========================================================================
+  deploy-prod:
+    name: Deploy to Prod
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build SAM application
+        run: |
+          cd infra
+          sam build --use-container
+
+      - name: Deploy to prod
+        run: |
+          cd infra
+          sam deploy --config-env prod --no-confirm-changeset --no-fail-on-empty-changeset
+
+      - name: Deploy frontend
+        run: |
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name presenters-feedback-prod \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" \
+            --output text)
+          aws s3 sync frontend/public/ "s3://$BUCKET/" --delete
+
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name presenters-feedback-prod \
+            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+            --output text)
+          aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
