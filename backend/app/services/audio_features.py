@@ -11,9 +11,11 @@ import logging
 import os
 import tempfile
 
+import boto3
 import numpy as np
 
 from app.config.settings import settings
+from app.services.storage import get_local_upload_path
 
 logger = logging.getLogger(__name__)
 
@@ -77,11 +79,8 @@ def extract_audio_features_from_s3(bucket: str, key: str) -> dict:
         Dictionary with audio features.
     """
     if settings.local_dev:
-        from app.services.storage import get_local_upload_path
         local_path = get_local_upload_path(key)
         return extract_audio_features(local_path)
-
-    import boto3
 
     s3 = boto3.client("s3", region_name=settings.aws_region)
     ext = key.rsplit(".", 1)[-1] if "." in key else "webm"

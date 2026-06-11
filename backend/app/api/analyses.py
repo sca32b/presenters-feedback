@@ -77,12 +77,12 @@ async def run_analysis_pipeline(analysis_id: str, user_id: str, object_key: str)
 
         # Step 0: Convert audio to WAV for reliable Transcribe processing
         loop = asyncio.get_event_loop()
-        if not object_key.endswith(".wav"):
+        if settings.local_dev or object_key.endswith(".wav"):
+            transcribe_key = object_key
+        else:
             transcribe_key = await loop.run_in_executor(
                 _executor, lambda: _convert_to_wav(settings.s3_bucket, object_key)
             )
-        else:
-            transcribe_key = object_key
 
         # Step 1 & 2 run concurrently: transcription (I/O) and audio feature extraction (CPU)
         transcribe_task = asyncio.ensure_future(
@@ -121,6 +121,11 @@ async def run_analysis_pipeline(analysis_id: str, user_id: str, object_key: str)
     except Exception:
         logger.exception("Analysis %s failed", analysis_id)
         update_analysis_status(analysis_id, "failed")
+
+
+async def _run_analysis_pipeline(analysis_id: str, user_id: str, object_key: str):
+    """Backward-compatible test/helper alias for the analysis pipeline."""
+    await run_analysis_pipeline(analysis_id, user_id, object_key)
 
 
 async def _transcribe(object_key: str, job_name: str) -> dict:

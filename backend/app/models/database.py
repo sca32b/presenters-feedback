@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
 
+import boto3
+
 from app.config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -43,7 +45,6 @@ def _decimal_to_float(obj):
 
 def get_table():
     """Get the DynamoDB table resource."""
-    import boto3
     dynamodb = boto3.resource("dynamodb", region_name=settings.aws_region)
     return dynamodb.Table(settings.dynamodb_table)
 

@@ -35,6 +35,7 @@ async def start_transcription(object_key: str, job_name: str) -> str:
     client.start_transcription_job(
         TranscriptionJobName=job_name,
         Media={"MediaFileUri": media_uri},
+        MediaFormat=object_key.rsplit(".", 1)[-1] if "." in object_key else "webm",
         LanguageCode="en-US",
         OutputBucketName=settings.s3_bucket,
         OutputKey=f"transcripts/{job_name}.json",

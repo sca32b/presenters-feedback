@@ -16,6 +16,16 @@ from botocore.exceptions import ClientError
 class TestGeneratePresignedUploadUrl:
     """Tests for generate_presigned_upload_url()."""
 
+    @pytest.fixture(autouse=True)
+    def aws_mode(self, monkeypatch):
+        """These tests validate AWS presigned URL generation, not LOCAL_DEV URLs."""
+        monkeypatch.setenv("LOCAL_DEV", "false")
+        import importlib
+        import app.config.settings
+        import app.services.storage
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.storage)
+
     def test_returns_url_and_object_key(self, mock_s3_client):
         """Should return a tuple of (upload_url, object_key)."""
         with patch("app.services.storage.boto3") as mock_boto3:

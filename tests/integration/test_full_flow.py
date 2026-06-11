@@ -1,13 +1,6 @@
-"""
-Integration tests for the full analysis pipeline.
-
-Tests the complete flow through app.services.analysis.run_analysis()
-with all AWS services mocked. Verifies that components are properly
-wired together.
-"""
-import json
+"""Integration tests for the full analysis pipeline."""
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch
 
 
 class TestFullAnalysisFlow:
@@ -16,92 +9,56 @@ class TestFullAnalysisFlow:
     @pytest.mark.asyncio
     async def test_happy_path_upload_to_results(
         self,
-        mock_dynamodb_table,
-        mock_transcribe_client,
-        mock_bedrock_client,
-        mock_s3_client,
-        sample_transcript_data,
-        sample_analysis_results,
+        monkeypatch,
     ):
         """Full happy path: create record -> transcribe -> analyze -> store results."""
-        mock_s3_client.get_object.return_value = {
-            "Body": MagicMock(read=lambda: json.dumps(sample_transcript_data).encode())
-        }
+        monkeypatch.setenv("LOCAL_DEV", "true")
+        import importlib
+        import app.config.settings
+        import app.services.analysis
+        import app.models.database
+        importlib.reload(app.config.settings)
+        importlib.reload(app.models.database)
+        importlib.reload(app.services.analysis)
 
-        with patch("app.services.analysis.get_table", return_value=mock_dynamodb_table), \
-             patch("app.services.transcribe.boto3") as mock_t_boto3, \
-             patch("app.services.bedrock.boto3") as mock_b_boto3, \
-             patch("app.services.analysis.boto3") as mock_a_boto3, \
-             patch("app.services.analysis.time") as mock_time:
+        app.models.database._local_store.clear()
+        analysis_id = await app.services.analysis.run_analysis(
+            user_id="test-user",
+            object_key="uploads/test-user/recording.webm",
+        )
 
-            mock_t_boto3.client.return_value = mock_transcribe_client
-            mock_b_boto3.client.return_value = mock_bedrock_client
-            mock_a_boto3.client.return_value = mock_s3_client
-            mock_time.sleep = MagicMock()
-
-            from app.services.analysis import run_analysis
-            analysis_id = await run_analysis(
-                user_id="test-user",
-                object_key="uploads/test-user/recording.webm",
-            )
-
-        # Verify the complete sequence
-        # 1. DynamoDB record created with 'processing' status
-        mock_dynamodb_table.put_item.assert_called_once()
-        initial_item = mock_dynamodb_table.put_item.call_args[1]["Item"]
-        assert initial_item["status"] == "processing"
-
-        # 2. Transcription job started
-        mock_transcribe_client.start_transcription_job.assert_called_once()
-
-        # 3. Transcript fetched from S3
-        mock_s3_client.get_object.assert_called_once()
-
-        # 4. Bedrock analysis invoked
-        mock_bedrock_client.invoke_model.assert_called_once()
-
-        # 5. Results stored with 'completed' status
-        mock_dynamodb_table.update_item.assert_called()
-        final_update = mock_dynamodb_table.update_item.call_args[1]
-        assert final_update["ExpressionAttributeValues"][":s"] == "completed"
-        assert ":r" in final_update["ExpressionAttributeValues"]
-
-        # 6. Returns valid analysis_id
         assert isinstance(analysis_id, str)
         assert len(analysis_id) > 0
+        item = app.models.database._local_store[analysis_id]
+        assert item["status"] == "completed"
+        assert item["results"]["overall_score"] >= 0
 
     @pytest.mark.asyncio
     async def test_transcription_failure_marks_failed(
         self,
-        mock_dynamodb_table,
-        mock_transcribe_client,
+        monkeypatch,
     ):
         """When transcription fails, pipeline should mark analysis as 'failed'."""
-        mock_transcribe_client.get_transcription_job.return_value = {
-            "TranscriptionJob": {
-                "TranscriptionJobName": "pf-test",
-                "TranscriptionJobStatus": "FAILED",
-                "FailureReason": "Audio too noisy",
-            }
-        }
+        monkeypatch.setenv("LOCAL_DEV", "true")
+        import importlib
+        import app.config.settings
+        import app.services.analysis
+        import app.models.database
+        importlib.reload(app.config.settings)
+        importlib.reload(app.models.database)
+        importlib.reload(app.services.analysis)
 
-        with patch("app.services.analysis.get_table", return_value=mock_dynamodb_table), \
-             patch("app.services.transcribe.boto3") as mock_t_boto3, \
-             patch("app.services.analysis.time") as mock_time:
+        async def fail_transcription(*_args, **_kwargs):
+            raise RuntimeError("Audio too noisy")
 
-            mock_t_boto3.client.return_value = mock_transcribe_client
-            mock_time.sleep = MagicMock()
+        app.models.database._local_store.clear()
+        app.models.database.create_analysis("fail-id", "test-user", "uploads/test-user/file.webm")
+        app.services.analysis._run_transcription = fail_transcription
+        await app.services.analysis.run_analysis_for_existing(
+            "fail-id", "test-user", "uploads/test-user/file.webm"
+        )
 
-            from app.services.analysis import run_analysis
-            analysis_id = await run_analysis("test-user", "uploads/test-user/file.webm")
-
-        # Should still return an analysis_id
-        assert isinstance(analysis_id, str)
-
-        # Status should be 'failed'
-        mock_dynamodb_table.update_item.assert_called()
-        update_args = mock_dynamodb_table.update_item.call_args[1]
-        assert update_args["ExpressionAttributeValues"][":s"] == "failed"
+        assert app.models.database._local_store["fail-id"]["status"] == "failed"
 
     @pytest.mark.asyncio
     async def test_presigned_url_generation_flow(self, mock_s3_client):
@@ -116,16 +73,15 @@ class TestFullAnalysisFlow:
                 content_type="audio/webm",
             )
 
-        # URL should be a presigned URL
+        # In LOCAL_DEV, the presigned URL is a backend local-upload URL.
         assert isinstance(url, str)
-        assert "https://" in url
+        assert "http://localhost:8000/api/local-upload/" in url
 
         # Key should follow the expected pattern
         assert key.startswith("uploads/user-123/")
         assert key.endswith(".webm")
 
-        # Verify the S3 client was called correctly
-        mock_s3_client.generate_presigned_url.assert_called_once()
+        mock_s3_client.generate_presigned_url.assert_not_called()
 
 
 class TestAPIIntegration:

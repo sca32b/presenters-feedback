@@ -102,6 +102,10 @@ class TestLocalUploadProductionMode:
         # This test documents the behavior from main.py:
         #   if settings.local_dev:
         #       app.include_router(local_upload_router, prefix="/api")
+        monkeypatch.setenv("LOCAL_DEV", "true")
+        import importlib
+        import app.config.settings
+        importlib.reload(app.config.settings)
         from app.config.settings import settings
         # In test mode, local_dev is True
         assert settings.local_dev is True

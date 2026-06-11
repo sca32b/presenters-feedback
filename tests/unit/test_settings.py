@@ -16,6 +16,16 @@ class TestSettings:
         """Settings should have sensible defaults."""
         from app.config.settings import Settings
 
+        import os
+        for key in (
+            "LOCAL_DEV",
+            "S3_BUCKET",
+            "DYNAMODB_TABLE",
+            "BEDROCK_MODEL_ID",
+            "CORS_ALLOWED_ORIGINS",
+        ):
+            os.environ.pop(key, None)
+
         s = Settings(
             _env_file=None,  # Don't read .env in tests
         )

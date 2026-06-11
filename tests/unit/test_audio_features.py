@@ -306,6 +306,9 @@ class TestExtractFromS3:
 
     def test_local_dev_uses_local_path(self):
         """In LOCAL_DEV, should use local upload path instead of S3."""
+        import importlib, app.config.settings, app.services.audio_features
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.audio_features)
         from app.services.audio_features import extract_audio_features_from_s3
 
         with patch("app.services.audio_features.get_local_upload_path", return_value="/fake/path.wav") as mock_path, \
@@ -324,17 +327,16 @@ class TestExtractFromS3:
         mock_s3 = MagicMock()
         mock_s3.download_file.return_value = None
 
+        import importlib, app.config.settings, app.services.audio_features
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.audio_features)
+
         with patch("app.services.audio_features.boto3") as mock_boto3, \
              patch("app.services.audio_features.extract_audio_features") as mock_extract, \
              patch("os.path.exists", return_value=True), \
              patch("os.remove"):
             mock_boto3.client.return_value = mock_s3
             mock_extract.return_value = {"mocked": True}
-
-            import importlib, app.config.settings
-            importlib.reload(app.config.settings)
-            import app.services.audio_features
-            importlib.reload(app.services.audio_features)
 
             result = app.services.audio_features.extract_audio_features_from_s3(
                 "my-bucket", "uploads/u1/file.webm"

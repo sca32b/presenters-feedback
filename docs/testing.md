@@ -45,7 +45,7 @@ On Windows, use the project scripts so the backend venv and `npm.cmd` are used c
 .\scripts\test.ps1
 ```
 
-or:
+If PowerShell blocks unsigned local scripts, use the batch wrapper:
 
 ```cmd
 scripts\test.bat

@@ -119,14 +119,14 @@ class TestStartTranscription:
         """Should call StartTranscriptionJob with correct parameters."""
         monkeypatch.setenv("LOCAL_DEV", "false")
 
+        import importlib
+        import app.config.settings
+        import app.services.transcribe
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.transcribe)
+
         with patch("app.services.transcribe.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_transcribe_client
-            # Re-import to pick up new settings
-            import importlib
-            import app.config.settings
-            importlib.reload(app.config.settings)
-            import app.services.transcribe
-            importlib.reload(app.services.transcribe)
 
             job_name = await app.services.transcribe.start_transcription(
                 object_key="uploads/user-123/abc.webm",
@@ -146,11 +146,12 @@ class TestStartTranscription:
         """Should extract media format from the object key extension."""
         monkeypatch.setenv("LOCAL_DEV", "false")
 
+        import importlib, app.config.settings, app.services.transcribe
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.transcribe)
+
         with patch("app.services.transcribe.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_transcribe_client
-            import importlib, app.config.settings, app.services.transcribe
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.transcribe)
 
             await app.services.transcribe.start_transcription("uploads/u1/file.wav", "pf-wav-job")
 
@@ -162,11 +163,12 @@ class TestStartTranscription:
         """Transcription output should be saved to transcripts/ prefix."""
         monkeypatch.setenv("LOCAL_DEV", "false")
 
+        import importlib, app.config.settings, app.services.transcribe
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.transcribe)
+
         with patch("app.services.transcribe.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_transcribe_client
-            import importlib, app.config.settings, app.services.transcribe
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.transcribe)
 
             await app.services.transcribe.start_transcription("uploads/u1/file.webm", "pf-job-xyz")
 
@@ -185,16 +187,16 @@ class TestExtractTranscriptFeatures:
         """Should count only pronunciation items as words."""
         from app.services.transcribe import extract_transcript_features
         features = extract_transcript_features(realistic_transcript_json)
-        # "Good morning everyone Um so today I want to talk Like really important" = 12 words
-        assert features["total_words"] == 12
+        # "Good morning everyone Um so today I want to talk Like really important" = 13 words
+        assert features["total_words"] == 13
 
     def test_calculates_words_per_minute(self, realistic_transcript_json):
         """WPM should be total_words / (duration in minutes)."""
         from app.services.transcribe import extract_transcript_features
         features = extract_transcript_features(realistic_transcript_json)
         # Duration from 0.0 to 7.5 = 7.5 seconds = 0.125 minutes
-        # 12 words / 0.125 min = 96 WPM
-        assert features["words_per_minute"] == 96.0
+        # 13 words / 0.125 min = 104 WPM
+        assert features["words_per_minute"] == 104.0
 
     def test_detects_filler_words(self, realistic_transcript_json):
         """Should detect um, like, so as filler words."""
@@ -207,7 +209,7 @@ class TestExtractTranscriptFeatures:
         """Filler ratio should be filler_count / total_words."""
         from app.services.transcribe import extract_transcript_features
         features = extract_transcript_features(realistic_transcript_json)
-        expected_ratio = round(3 / 12, 4)
+        expected_ratio = round(3 / 13, 4)
         assert features["filler_word_ratio"] == expected_ratio
 
     def test_detects_long_pauses(self, realistic_transcript_json):

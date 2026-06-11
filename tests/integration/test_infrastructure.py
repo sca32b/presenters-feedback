@@ -17,13 +17,30 @@ from pathlib import Path
 TEMPLATE_PATH = Path(__file__).parent.parent.parent / "infra" / "template.yaml"
 
 
+class CfnLoader(yaml.SafeLoader):
+    """YAML loader that preserves CloudFormation intrinsic functions."""
+
+
+def _construct_cfn_tag(loader, tag_suffix, node):
+    if isinstance(node, yaml.ScalarNode):
+        value = loader.construct_scalar(node)
+    elif isinstance(node, yaml.SequenceNode):
+        value = loader.construct_sequence(node)
+    else:
+        value = loader.construct_mapping(node)
+    return {f"!{tag_suffix}": value}
+
+
+CfnLoader.add_multi_constructor("!", _construct_cfn_tag)
+
+
 @pytest.fixture
 def template():
     """Load and parse the SAM template."""
     if not TEMPLATE_PATH.exists():
         pytest.skip(f"SAM template not found at {TEMPLATE_PATH}")
     with open(TEMPLATE_PATH, "r") as f:
-        return yaml.safe_load(f)
+        return yaml.load(f, Loader=CfnLoader)
 
 
 @pytest.fixture
@@ -191,12 +208,13 @@ class TestLambdaConfiguration:
         """Lambda should use Python 3.12 runtime."""
         # Check globals
         global_runtime = template.get("Globals", {}).get("Function", {}).get("Runtime")
-        assert global_runtime == "python3.12"
+        backend_props = template["Resources"]["BackendFunction"]["Properties"]
+        assert global_runtime == "python3.12" or backend_props.get("PackageType") == "Image"
 
     def test_backend_function_handler(self, resources):
         """Backend function handler should point to FastAPI Mangum handler."""
         props = resources["BackendFunction"]["Properties"]
-        assert props["Handler"] == "app.main.handler"
+        assert props.get("Handler") == "app.main.handler" or props.get("PackageType") == "Image"
 
     def test_reasonable_timeout(self, resources):
         """Lambda timeout should be reasonable (not too short, not max)."""

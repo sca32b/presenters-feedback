@@ -1,7 +1,7 @@
 """Amazon Bedrock (Claude) integration for speech analysis.
 
 In LOCAL_DEV mode, returns mock analysis results without calling AWS.
-Uses the InvokeModel API for direct Claude invocation.
+Uses the Converse API for Claude invocation.
 """
 
 import json
@@ -135,28 +135,22 @@ async def analyze_presentation(
     )
 
     model_id = settings.bedrock_model_id
-    logger.info("Calling Bedrock invoke_model with model_id=%s", model_id)
+    logger.info("Calling Bedrock converse with model_id=%s", model_id)
 
     try:
-        body = json.dumps({
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 2048,
-            "temperature": 0.3,
-            "system": SYSTEM_PROMPT,
-            "messages": [
-                {"role": "user", "content": prompt}
-            ],
-        })
-
-        response = client.invoke_model(
+        response = client.converse(
             modelId=model_id,
-            contentType="application/json",
-            accept="application/json",
-            body=body,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [{"text": prompt}],
+                }
+            ],
+            system=[{"text": SYSTEM_PROMPT}],
+            inferenceConfig={"maxTokens": 2048},
         )
 
-        response_body = json.loads(response["body"].read())
-        result_text = response_body["content"][0]["text"]
+        result_text = response["output"]["message"]["content"][0]["text"]
         logger.info("Bedrock response received, length=%d", len(result_text))
         return _parse_json_response(result_text)
 

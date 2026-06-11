@@ -162,11 +162,12 @@ class TestConverseApiCall:
         """Should invoke the model configured in settings."""
         monkeypatch.setenv("LOCAL_DEV", "false")
 
+        import importlib, app.config.settings, app.services.bedrock
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.bedrock)
+
         with patch("app.services.bedrock.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_bedrock_converse_client
-            import importlib, app.config.settings, app.services.bedrock
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.bedrock)
 
             await app.services.bedrock.analyze_presentation(
                 sample_transcript_features, sample_audio_features
@@ -176,25 +177,27 @@ class TestConverseApiCall:
         assert call_kwargs["modelId"] == "us.anthropic.claude-fable-5"
 
     @pytest.mark.asyncio
-    async def test_uses_low_temperature(
+    async def test_omits_deprecated_temperature(
         self, mock_bedrock_converse_client, sample_transcript_features,
         sample_audio_features, monkeypatch
     ):
-        """Should use low temperature for consistent scoring."""
+        """Fable 5 rejects temperature, so the request must omit it."""
         monkeypatch.setenv("LOCAL_DEV", "false")
+
+        import importlib, app.config.settings, app.services.bedrock
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.bedrock)
 
         with patch("app.services.bedrock.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_bedrock_converse_client
-            import importlib, app.config.settings, app.services.bedrock
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.bedrock)
 
             await app.services.bedrock.analyze_presentation(
                 sample_transcript_features, sample_audio_features
             )
 
         call_kwargs = mock_bedrock_converse_client.converse.call_args[1]
-        assert call_kwargs["inferenceConfig"]["temperature"] == 0.3
+        assert "temperature" not in call_kwargs.get("inferenceConfig", {})
+        assert call_kwargs["inferenceConfig"]["maxTokens"] == 2048
 
     @pytest.mark.asyncio
     async def test_includes_system_prompt(
@@ -204,11 +207,12 @@ class TestConverseApiCall:
         """Should include a system prompt about being a presentation coach."""
         monkeypatch.setenv("LOCAL_DEV", "false")
 
+        import importlib, app.config.settings, app.services.bedrock
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.bedrock)
+
         with patch("app.services.bedrock.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_bedrock_converse_client
-            import importlib, app.config.settings, app.services.bedrock
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.bedrock)
 
             await app.services.bedrock.analyze_presentation(
                 sample_transcript_features, sample_audio_features
@@ -281,11 +285,12 @@ class TestPromptContent:
         """The formatted prompt should contain actual feature values."""
         monkeypatch.setenv("LOCAL_DEV", "false")
 
+        import importlib, app.config.settings, app.services.bedrock
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.bedrock)
+
         with patch("app.services.bedrock.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_bedrock_converse_client
-            import importlib, app.config.settings, app.services.bedrock
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.bedrock)
 
             await app.services.bedrock.analyze_presentation(
                 sample_transcript_features, sample_audio_features
@@ -366,11 +371,12 @@ class TestErrorHandling:
             "Converse"
         )
 
+        import importlib, app.config.settings, app.services.bedrock
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.bedrock)
+
         with patch("app.services.bedrock.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_client
-            import importlib, app.config.settings, app.services.bedrock
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.bedrock)
 
             with pytest.raises(ClientError):
                 await app.services.bedrock.analyze_presentation(
@@ -389,11 +395,12 @@ class TestErrorHandling:
             "Converse"
         )
 
+        import importlib, app.config.settings, app.services.bedrock
+        importlib.reload(app.config.settings)
+        importlib.reload(app.services.bedrock)
+
         with patch("app.services.bedrock.boto3") as mock_boto3:
             mock_boto3.client.return_value = mock_client
-            import importlib, app.config.settings, app.services.bedrock
-            importlib.reload(app.config.settings)
-            importlib.reload(app.services.bedrock)
 
             with pytest.raises(ClientError):
                 await app.services.bedrock.analyze_presentation(

@@ -7,6 +7,8 @@ import logging
 import os
 import uuid
 
+import boto3
+
 from app.config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -29,7 +31,6 @@ def generate_presigned_upload_url(user_id: str, filename: str, content_type: str
         logger.info("LOCAL_DEV: Generated upload URL for %s", object_key)
         return upload_url, object_key
 
-    import boto3
     s3_client = boto3.client("s3", region_name=settings.aws_region)
     upload_url = s3_client.generate_presigned_url(
         "put_object",
