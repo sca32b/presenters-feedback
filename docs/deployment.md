@@ -56,7 +56,7 @@ All infrastructure is defined in `infra/template.yaml` (AWS SAM).
 | Database | DynamoDB on-demand | Zero idle cost, simple key-value access, TTL |
 | Auth | Cognito (admin-create only) | Managed, free tier (50K MAUs), JWT-based |
 | Frontend CDN | CloudFront PriceClass_100 | Cheapest: US/Canada/Europe edges only |
-| Model | Claude 3.5 Haiku | ~$0.01/analysis, sufficient quality for feedback |
+| Model | Claude Fable 5 | Configured through `BEDROCK_MODEL_ID` |
 
 ---
 
@@ -68,7 +68,7 @@ All infrastructure is defined in `infra/template.yaml` (AWS SAM).
 |---------|-----------|------|
 | Amazon Transcribe | 5 min batch | $0.12 |
 | Lambda (librosa) | ~30s at 1 GB | $0.0005 |
-| Bedrock Claude 3.5 Haiku | ~2K in + ~1.5K out tokens | $0.01 |
+| Bedrock Claude Fable 5 | ~2K in + ~1.5K out tokens | Usage-based |
 | S3 storage | ~10 MB audio + results | ~$0.0002 |
 | API Gateway | 3-4 requests | ~$0.000004 |
 | DynamoDB | ~5 read/write units | ~$0.000003 |
@@ -252,8 +252,8 @@ aws configure
 2. **Enable Bedrock model access** (one-time, manual step):
    - Go to [Amazon Bedrock Console](https://console.aws.amazon.com/bedrock/)
    - Navigate to "Model access" in the left sidebar
-   - Request access to `Anthropic > Claude 3.5 Haiku`
-   - Wait for approval (usually instant for Haiku)
+   - Request access to `Anthropic > Claude Fable 5`
+   - Wait for approval
 
 3. **Build and deploy:**
 
@@ -481,7 +481,7 @@ The `.github/workflows/deploy.yml` workflow provides automated testing and deplo
 - For local development, ensure `CORS_ALLOWED_ORIGINS=http://localhost:3000`
 
 **Bedrock "Access denied":**
-- Go to the Bedrock console and verify model access is granted for Claude 3.5 Haiku
+- Go to the Bedrock console and verify model access is granted for Claude Fable 5
 - Model access requests are per-region; ensure you requested in us-east-1
 
 **S3 presigned URL upload fails:**

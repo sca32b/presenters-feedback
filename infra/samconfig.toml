@@ -12,7 +12,7 @@ s3_prefix = "presenters-feedback"
 region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=dev AudioRetentionDays=7 BedrockModelId=anthropic.claude-sonnet-4-5-20250929-v1:0"
+parameter_overrides = "Environment=dev AudioRetentionDays=7 BedrockModelId=us.anthropic.claude-fable-5"
 
 [default.build.parameters]
 use_container = false
@@ -24,4 +24,4 @@ s3_prefix = "presenters-feedback-prod"
 region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Environment=prod AudioRetentionDays=30 BedrockModelId=anthropic.claude-sonnet-4-5-20250929-v1:0"
+parameter_overrides = "Environment=prod AudioRetentionDays=30 BedrockModelId=us.anthropic.claude-fable-5"

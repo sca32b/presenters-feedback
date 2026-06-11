@@ -21,8 +21,8 @@ Parameters:
     Description: Days before audio files are auto-deleted
   BedrockModelId:
     Type: String
-    Default: "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
-    Description: Bedrock model ID (Haiku recommended for cost)
+    Default: "us.anthropic.claude-fable-5"
+    Description: Bedrock model ID or inference profile for presentation analysis
 
 Resources:
 

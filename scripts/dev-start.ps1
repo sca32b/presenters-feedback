@@ -33,7 +33,7 @@ $env:LOCAL_DEV = "true"
 $env:AWS_REGION = "us-east-1"
 $env:S3_BUCKET = "presenters-feedback-audio-dev"
 $env:DYNAMODB_TABLE = "presenters-feedback-dev"
-$env:BEDROCK_MODEL_ID = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+$env:BEDROCK_MODEL_ID = "us.anthropic.claude-fable-5"
 $env:CORS_ALLOWED_ORIGINS = "http://localhost:3000"
 
 # Create venv if needed

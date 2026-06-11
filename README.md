@@ -220,7 +220,7 @@ Key environment variables (see `infra/env.example` for full list):
 | `AWS_REGION` | `us-east-1` | AWS region for all services |
 | `S3_BUCKET` | `presenters-feedback-audio-dev` | S3 bucket for audio uploads |
 | `DYNAMODB_TABLE` | `presenters-feedback-dev` | DynamoDB table name |
-| `BEDROCK_MODEL_ID` | `anthropic.claude-3-5-haiku-20241022-v1:0` | Bedrock model for analysis |
+| `BEDROCK_MODEL_ID` | `us.anthropic.claude-fable-5` | Bedrock model for analysis |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:3000` | Allowed CORS origins |
 
 ## Cost Estimate (AWS)
@@ -230,7 +230,7 @@ At ~100 analyses per month (moderate personal use):
 | Service | Estimated Cost |
 |---------|---------------|
 | Transcribe | $1-2 |
-| Bedrock (Claude Haiku) | $1-2 |
+| Bedrock (Claude Fable 5) | Usage-based |
 | Lambda + API Gateway | ~$0 (free tier) |
 | S3 + DynamoDB | ~$0 (free tier) |
 | Cognito | $0 (free tier) |

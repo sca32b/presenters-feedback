@@ -173,7 +173,7 @@ class TestConverseApiCall:
             )
 
         call_kwargs = mock_bedrock_converse_client.converse.call_args[1]
-        assert call_kwargs["modelId"] == "anthropic.claude-3-sonnet-20240229-v1:0"
+        assert call_kwargs["modelId"] == "us.anthropic.claude-fable-5"
 
     @pytest.mark.asyncio
     async def test_uses_low_temperature(

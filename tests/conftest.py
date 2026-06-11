@@ -30,7 +30,7 @@ def override_settings(monkeypatch):
     monkeypatch.setenv("LOCAL_DEV", "true")
     monkeypatch.setenv("S3_BUCKET", "test-presenter-feedback-bucket")
     monkeypatch.setenv("DYNAMODB_TABLE", "test-presenter-feedback-table")
-    monkeypatch.setenv("BEDROCK_MODEL_ID", "anthropic.claude-3-sonnet-20240229-v1:0")
+    monkeypatch.setenv("BEDROCK_MODEL_ID", "us.anthropic.claude-fable-5")
     monkeypatch.setenv("COGNITO_USER_POOL_ID", "us-east-1_testpool")
     monkeypatch.setenv("COGNITO_APP_CLIENT_ID", "test-client-id")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")

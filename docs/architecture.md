@@ -271,7 +271,7 @@ In local development, the auth middleware reads a `LOCAL_DEV=true` environment v
 | `S3_BUCKET` | `presenters-feedback-dev` | Audio upload bucket |
 | `DYNAMODB_TABLE` | `presenters-feedback-dev` | Analysis results table |
 | `COGNITO_USER_POOL_ID` | - | Cognito pool (prod only) |
-| `BEDROCK_MODEL_ID` | `anthropic.claude-3-sonnet-20240229-v1:0` | Bedrock model |
+| `BEDROCK_MODEL_ID` | `us.anthropic.claude-fable-5` | Bedrock model |
 
 ## 8. AWS Deployment Architecture
 

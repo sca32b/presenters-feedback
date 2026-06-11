@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     dynamodb_table: str = "presenters-feedback-dev"
     cognito_user_pool_id: str = ""
     cognito_app_client_id: str = ""
-    bedrock_model_id: str = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    bedrock_model_id: str = "us.anthropic.claude-fable-5"
     cors_allowed_origins: str = "*"
     upload_url_expiry: int = 300  # 5 minutes
     max_audio_size_mb: int = 50

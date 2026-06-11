@@ -351,22 +351,16 @@ Claude excels at structured analysis of text, understanding context, and generat
 actionable feedback. It can evaluate vocabulary sophistication, argument structure,
 persuasiveness, and clarity -- tasks that rule-based systems handle poorly.
 
-### Available Claude Models on Bedrock
+### Configured Claude Model on Bedrock
 
-| Model | Model ID on Bedrock | Context Window | Input Price (per 1K tokens) | Output Price (per 1K tokens) | Recommendation |
-|-------|---------------------|----------------|----------------------------|-----------------------------|----|
-| Claude 3.5 Haiku | `anthropic.claude-3-5-haiku-20241022-v1:0` | 200K | $0.001 | $0.005 | **Best for cost-sensitive personal use** |
-| Claude 3.5 Sonnet v2 | `anthropic.claude-3-5-sonnet-20241022-v2:0` | 200K | $0.003 | $0.015 | Good balance of quality/cost |
-| Claude Sonnet 4 | `anthropic.claude-sonnet-4-20250514-v1:0` | 200K | $0.003 | $0.015 | Latest Sonnet, excellent reasoning |
-| Claude Opus 4 | `anthropic.claude-opus-4-20250514-v1:0` | 200K | $0.015 | $0.075 | Best quality, higher cost |
+| Model | Inference Profile ID | Recommendation |
+|-------|----------------------|----------------|
+| Claude Fable 5 | `us.anthropic.claude-fable-5` | **Current configured model for presentation analysis** |
 
-**Recommendation**: Use **Claude 3.5 Haiku** for personal use. A 5-minute presentation
-transcript is roughly 700-900 words (~1,000 tokens input). With the prompt and audio
-features included, expect ~2,000 tokens input and ~1,500 tokens output.
-
-**Cost per analysis with Haiku**: ~$0.002 input + ~$0.0075 output = **~$0.01**
-
-If higher quality is needed, Claude Sonnet 4 costs ~$0.03 per analysis.
+A 5-minute presentation transcript is roughly 700-900 words (~1,000 tokens input).
+With the prompt and audio features included, expect roughly ~2,000 tokens input and
+~1,500 tokens output per analysis. Check the Bedrock console for current Fable 5
+pricing before estimating production cost.
 
 ### Region Availability
 Bedrock Claude models are available in: `us-east-1`, `us-west-2`, `eu-west-1`,
@@ -385,7 +379,7 @@ bedrock_runtime = boto3.client("bedrock-runtime", region_name="us-east-1")
 def analyze_presentation(
     transcript_features: dict,
     audio_features: dict,
-    model_id: str = "anthropic.claude-3-5-haiku-20241022-v1:0",
+    model_id: str = "us.anthropic.claude-fable-5",
 ) -> dict:
     """Send transcript and audio features to Claude for comprehensive analysis."""
 
@@ -535,7 +529,7 @@ def analyze_with_invoke_model(prompt: str) -> str:
     })
 
     response = bedrock_runtime.invoke_model(
-        modelId="anthropic.claude-3-5-haiku-20241022-v1:0",
+        modelId="us.anthropic.claude-fable-5",
         body=body,
         contentType="application/json",
         accept="application/json",
@@ -631,7 +625,7 @@ def detect_entities(text: str) -> list:
 |---------|-----------|---------------|
 | AWS Transcribe | 5 min batch transcription | $0.12 |
 | Lambda (librosa) | ~30s at 1 GB memory | $0.0005 |
-| Bedrock Claude 3.5 Haiku | ~2K input + ~1.5K output tokens | $0.01 |
+| Bedrock Claude Fable 5 | ~2K input + ~1.5K output tokens | Usage-based |
 | Amazon Comprehend (optional) | Sentiment on ~4K chars | $0.004 |
 | S3 storage | Audio + results (~10 MB) | ~$0.0002 |
 | **Total (without Comprehend)** | | **~$0.13** |
@@ -650,7 +644,7 @@ def detect_entities(text: str) -> list:
 - **Lambda**: 1M free requests + 400,000 GB-seconds
 - **Comprehend**: 50,000 units/month free
 - **S3**: 5 GB free
-- Bedrock has **no free tier**, but Haiku costs are negligible
+- Bedrock has **no free tier**; check current Fable 5 pricing before production use
 
 **With free tier, cost drops to ~$0.01 per analysis** (just the Bedrock call).
 
@@ -842,14 +836,14 @@ reduces Lambda execution time.
 |-----------|-------------------|--------------|-------------------|
 | Speech-to-text | AWS Transcribe (batch) | Standard, en-US | $0.12 |
 | Audio features | Lambda + librosa | Container image, 1GB RAM | $0.0005 |
-| Comprehensive analysis | Bedrock Claude | `anthropic.claude-3-5-haiku-20241022-v1:0` | $0.01 |
+| Comprehensive analysis | Bedrock Claude | `us.anthropic.claude-fable-5` | Usage-based |
 | Sentiment (optional) | Amazon Comprehend | DetectSentiment | $0.004 |
 | Orchestration | Single Lambda or Step Functions | 300s timeout | (included in Lambda cost) |
 | Storage | S3 | Standard | ~$0.0002 |
 | **Total** | | | **~$0.13** |
 
 ### Key Decisions
-1. **Use Haiku for cost efficiency** -- upgrade to Sonnet if analysis quality is insufficient.
+1. **Use the configured Fable 5 inference profile** and monitor Bedrock usage costs.
 2. **Batch Transcribe over real-time** -- simpler, same cost, sufficient for uploaded recordings.
 3. **librosa in Lambda container** -- only practical way to get pitch/energy features in AWS.
 4. **Comprehend is optional** -- Claude handles sentiment well; add Comprehend only if you

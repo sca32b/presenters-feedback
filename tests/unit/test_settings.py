@@ -27,11 +27,11 @@ class TestSettings:
         assert s.max_audio_size_mb == 50
 
     def test_bedrock_model_default(self):
-        """Default Bedrock model should be Claude Sonnet."""
+        """Default Bedrock model should be Claude Fable 5."""
         from app.config.settings import Settings
 
         s = Settings(_env_file=None)
-        assert "claude" in s.bedrock_model_id or "anthropic" in s.bedrock_model_id
+        assert s.bedrock_model_id == "us.anthropic.claude-fable-5"
 
     def test_cors_default(self):
         """Default CORS origin should be localhost."""

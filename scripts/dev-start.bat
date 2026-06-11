@@ -25,7 +25,7 @@ set LOCAL_DEV=true
 set AWS_REGION=us-east-1
 set S3_BUCKET=presenters-feedback-audio-dev
 set DYNAMODB_TABLE=presenters-feedback-dev
-set BEDROCK_MODEL_ID=anthropic.claude-sonnet-4-5-20250929-v1:0
+set BEDROCK_MODEL_ID=us.anthropic.claude-fable-5
 set CORS_ALLOWED_ORIGINS=http://localhost:3000
 
 REM Install backend dependencies if needed
