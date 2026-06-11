@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 SYSTEM_PROMPT = (
     "You are an expert presentation coach who has trained hundreds of "
     "TED speakers. You analyze presentations with precision and provide "
-    "actionable, specific feedback. You always respond in valid JSON format."
+    "actionable, specific feedback. You always respond with only a valid JSON "
+    "object, with no markdown fences or explanatory text."
 )
 
 ANALYSIS_PROMPT = """Analyze this presentation and provide detailed scoring and feedback.
@@ -99,7 +100,9 @@ Provide your analysis as a JSON object with this exact structure:
   ]
 }}
 
-Respond with ONLY the JSON object, no additional text."""
+Respond with ONLY the JSON object, no markdown code fences, and no additional text.
+Inside JSON string values, do not use unescaped double quotes around quoted phrases;
+use apostrophes or rephrase instead."""
 
 
 async def analyze_presentation(
@@ -150,7 +153,7 @@ async def analyze_presentation(
             inferenceConfig={"maxTokens": 2048},
         )
 
-        result_text = response["output"]["message"]["content"][0]["text"]
+        result_text = _extract_text_from_converse_response(response)
         logger.info("Bedrock response received, length=%d", len(result_text))
         return _parse_json_response(result_text)
 
@@ -173,6 +176,15 @@ def _parse_json_response(text: str) -> dict:
         if json_match:
             return json.loads(json_match.group(0))
         raise ValueError(f"Could not parse JSON from response: {text[:200]}")
+
+
+def _extract_text_from_converse_response(response: dict) -> str:
+    """Return the first text block from a Bedrock Converse response."""
+    content = response.get("output", {}).get("message", {}).get("content", [])
+    for block in content:
+        if "text" in block:
+            return block["text"]
+    raise ValueError("Bedrock response did not contain a text content block")
 
 
 def _generate_mock_analysis(transcript_features: dict) -> dict:

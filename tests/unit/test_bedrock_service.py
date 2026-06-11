@@ -351,6 +351,21 @@ class TestParseJsonResponse:
         with pytest.raises((json.JSONDecodeError, ValueError)):
             _parse_json_response("This is just plain text with no JSON at all.")
 
+    def test_extracts_text_after_reasoning_block(self):
+        """Fable 5 may return reasoningContent before the text block."""
+        from app.services.bedrock import _extract_text_from_converse_response
+        response = {
+            "output": {
+                "message": {
+                    "content": [
+                        {"SDK_UNKNOWN_MEMBER": {"name": "reasoningContent"}},
+                        {"text": '{"overall_score": 81}'},
+                    ]
+                }
+            }
+        }
+        assert _extract_text_from_converse_response(response) == '{"overall_score": 81}'
+
 
 # ---------------------------------------------------------------------------
 # Error handling tests
