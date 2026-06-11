@@ -39,6 +39,18 @@ npm install
 
 ### All tests (recommended)
 
+On Windows, use the project scripts so the backend venv and `npm.cmd` are used consistently:
+
+```powershell
+.\scripts\test.ps1
+```
+
+or:
+
+```cmd
+scripts\test.bat
+```
+
 ```bash
 python tests/run_tests.py
 ```
