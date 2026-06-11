@@ -197,7 +197,7 @@ class TestConverseApiCall:
 
         call_kwargs = mock_bedrock_converse_client.converse.call_args[1]
         assert "temperature" not in call_kwargs.get("inferenceConfig", {})
-        assert call_kwargs["inferenceConfig"]["maxTokens"] == 2048
+        assert call_kwargs["inferenceConfig"]["maxTokens"] == 4096
 
     @pytest.mark.asyncio
     async def test_includes_system_prompt(

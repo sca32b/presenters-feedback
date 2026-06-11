@@ -14,6 +14,7 @@ import boto3
 from app.config.settings import settings
 
 logger = logging.getLogger(__name__)
+MAX_OUTPUT_TOKENS = 4096
 
 SYSTEM_PROMPT = (
     "You are an expert presentation coach who has trained hundreds of "
@@ -150,7 +151,7 @@ async def analyze_presentation(
                 }
             ],
             system=[{"text": SYSTEM_PROMPT}],
-            inferenceConfig={"maxTokens": 2048},
+            inferenceConfig={"maxTokens": MAX_OUTPUT_TOKENS},
         )
 
         result_text = _extract_text_from_converse_response(response)
