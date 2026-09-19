@@ -1,6 +1,10 @@
-# Presenter Feedback
+<p align="center">
+  <img src="assets/logo.svg" alt="Presenter Feedback" width="128" height="128" />
+</p>
 
-AI-powered presentation coach. Record your speech in the browser, get detailed feedback on voice/tone, vocabulary, pacing, and overall TedX-level delivery quality.
+<h1 align="center">Presenter Feedback</h1>
+
+<p align="center">AI-powered presentation coach. Record your speech in the browser, get detailed feedback on voice/tone, vocabulary, pacing, and overall TedX-level delivery quality.</p>
 
 ## How It Works
 
